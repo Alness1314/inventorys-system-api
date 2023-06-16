@@ -1,10 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateVirtualMachineDto } from '../dto/create-virtual-machine.dto';
 import { UpdateVirtualMachineDto } from '../dto/update-virtual-machine.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +8,8 @@ import { VirtualMachine } from '../entities/virtual-machine.entity';
 //import { ApplicationInfo } from 'src/application-info/entities/application-info.entity';
 import { ResponseVirtualMachineDto } from '../dto/response-virtual-machine.dto';
 import { ApplicationInfoService } from 'src/application-info/service/application-info.service';
+import { filterData } from 'src/utils/utils.functions';
+import { ApplicationInfo } from 'src/application-info/entities/application-info.entity';
 
 @Injectable()
 export class VirtualMachineService {
@@ -35,37 +32,37 @@ export class VirtualMachineService {
     const listApplication = [];
     for (const value of createVirtualMachineDto.applicationInfoId) {
       const valuetem = await this._appInfoService.findOne(value);
-      if (!valuetem) {
-        throw new BadRequestException(
-          `No se encontro aplicacion con id: ${valuetem}.`,
-        );
-      }
       listApplication.push(valuetem);
     }
 
     newVmachine.applicationInfo = listApplication;
-
     try {
       virtualMachine = await this._vmachineRepository.save(newVmachine);
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException('Error: ' + error.message);
+      throw new BadRequestException('Error: ' + error.message);
     }
     return plainToInstance(ResponseVirtualMachineDto, virtualMachine);
   }
 
   async findAll() {
-    const newVMachineList = await this._vmachineRepository.find({
-      where: { deleted: false },
-      relations: { applicationInfo: true },
-    });
+    const newVMachineList: VirtualMachine[] =
+      await this._vmachineRepository.find({
+        where: {
+          deleted: false,
+        },
+        relations: ['applicationInfo'],
+      });
 
-    for (const vMachine of newVMachineList) {
-      vMachine.applicationInfo = vMachine.applicationInfo.filter(
-        (app) => app.deleted === false,
+    //filtramos las aplicaciones borradas
+    newVMachineList.forEach((virtualMach) => {
+      virtualMach.applicationInfo = filterData(
+        virtualMach.applicationInfo,
+        'deleted',
+        false,
       );
-    }
-
+    });
+    //return queryBuilder;
     return plainToInstance(ResponseVirtualMachineDto, newVMachineList);
   }
 
@@ -74,13 +71,39 @@ export class VirtualMachineService {
     return plainToInstance(ResponseVirtualMachineDto, vMachine);
   }
 
-  update(id: string, updateVirtualMachineDto: UpdateVirtualMachineDto) {
-    this.logger.log(JSON.stringify(updateVirtualMachineDto));
-    return `This action updates a #${id} virtualMachine`;
+  async update(id: string, updateVirtualMachineDto: UpdateVirtualMachineDto) {
+    const findVMachine = await this.internalFindOne(id);
+    const updateVMachine = Object.assign(findVMachine, updateVirtualMachineDto);
+    let responseUpdate: VirtualMachine;
+    //nuevas APPLICATIONES a añadir
+    for (const value of updateVirtualMachineDto.applicationInfoId) {
+      const valuetem = await this._appInfoService.findOne(value);
+      updateVMachine.applicationInfo.push(
+        plainToInstance(ApplicationInfo, valuetem),
+      );
+    }
+    try {
+      responseUpdate = await this._vmachineRepository.save(updateVMachine);
+    } catch (error) {
+      this.logger.error('Error: ' + error.message);
+    }
+
+    return plainToInstance(ResponseVirtualMachineDto, responseUpdate);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} virtualMachine`;
+  async remove(id: string) {
+    const findVMachine = await this.internalFindOne(id);
+    let responseUpdate: VirtualMachine;
+    findVMachine.deleted = true;
+    try {
+      responseUpdate = await this._vmachineRepository.save(findVMachine);
+    } catch (error) {
+      this.logger.error('Error: ' + error.message);
+    }
+    return {
+      msj: 'elemento ' + responseUpdate.nameVM + ' eliminado.',
+      status: true,
+    };
   }
 
   async internalFindOne(id: string): Promise<VirtualMachine> {

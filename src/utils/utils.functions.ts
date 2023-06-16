@@ -8,3 +8,7 @@ export const setDateLocal = ({ value }) => {
   if (data === 'invalid Date') return null;
   return data;
 };
+
+export const filterData = (array, property, value) => {
+  return array.filter((item) => item[property] === value);
+};

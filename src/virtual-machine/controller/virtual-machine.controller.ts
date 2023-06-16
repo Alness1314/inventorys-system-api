@@ -3,9 +3,9 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { VirtualMachineService } from '../service/virtual-machine.service';
 import { CreateVirtualMachineDto } from '../dto/create-virtual-machine.dto';
@@ -32,7 +32,7 @@ export class VirtualMachineController {
     return this.virtualMachineService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateVirtualMachineDto: UpdateVirtualMachineDto,
