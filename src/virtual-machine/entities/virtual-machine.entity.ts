@@ -47,6 +47,7 @@ export class VirtualMachine {
 
   @ManyToMany(() => ApplicationInfo, (appInfo) => appInfo.id, {
     nullable: true,
+    eager: true,
   })
   @JoinTable({
     name: 'vMachines_applications',

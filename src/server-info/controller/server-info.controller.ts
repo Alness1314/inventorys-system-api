@@ -3,9 +3,9 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { ServerInfoService } from '../service/server-info.service';
 import { CreateServerInfoDto } from '../dto/create-server-info.dto';
@@ -32,7 +32,7 @@ export class ServerInfoController {
     return this.serverInfoService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(
     @Param('id') id: string,
     @Body() updateServerInfoDto: UpdateServerInfoDto,

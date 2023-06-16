@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { ResponseServerInfo } from '../dto/response-server-info.dto';
 import { VirtualMachineService } from 'src/virtual-machine/service/virtual-machine.service';
+import { filterData } from 'src/utils/utils.functions';
 
 @Injectable()
 export class ServerInfoService {
@@ -47,26 +48,80 @@ export class ServerInfoService {
       relations: { hardwareInfo: true, virtualMachines: true },
     });
 
+    newServers.forEach((server) => {
+      server.virtualMachines = filterData(
+        server.virtualMachines,
+        'deleted',
+        false,
+      );
+
+      server.virtualMachines.forEach((vm) => {
+        vm.applicationInfo = filterData(vm.applicationInfo, 'deleted', false);
+      });
+    });
+
     return plainToInstance(ResponseServerInfo, newServers);
   }
 
   async findOne(id: string) {
-    const server: ServerInfo = await this._serverRepository.findOne({
-      relations: { hardwareInfo: true, virtualMachines: true },
-      where: { id: id },
-    });
-    if (!server) {
-      throw new NotFoundException('server with id:' + id + ' not found');
-    }
+    const server: ServerInfo = await this.internalFindOne(id);
     return plainToInstance(ResponseServerInfo, server);
   }
 
-  update(id: string, updateServerInfoDto: UpdateServerInfoDto) {
-    this.logger.log(JSON.stringify(updateServerInfoDto));
-    return `This action updates a #${id} serverInfo`;
+  async update(id: string, updateServerInfoDto: UpdateServerInfoDto) {
+    const findServer = await this.internalFindOne(id);
+
+    const updateServer = this._serverRepository.merge(
+      findServer,
+      updateServerInfoDto,
+    );
+    let responseUpdate: ServerInfo;
+
+    try {
+      responseUpdate = await this._serverRepository.save(updateServer);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Error: ' + error.message);
+    }
+    return plainToInstance(ResponseServerInfo, responseUpdate);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} serverInfo`;
+  async remove(id: string) {
+    const findServer = await this.internalFindOne(id);
+    findServer.deleted = true;
+    let responseUpdate: ServerInfo;
+
+    try {
+      responseUpdate = await this._serverRepository.save(findServer);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Error: ' + error.message);
+    }
+    return {
+      msj: 'elemento ' + responseUpdate.serverName + ' eliminado.',
+      status: true,
+    };
+  }
+
+  async internalFindOne(id: string) {
+    const server: ServerInfo = await this._serverRepository.findOne({
+      relations: { hardwareInfo: true, virtualMachines: true },
+      where: { id: id, deleted: false },
+    });
+    if (!server) {
+      throw new NotFoundException('server with id: ' + id + ' not found');
+    }
+
+    server.virtualMachines = filterData(
+      server.virtualMachines,
+      'deleted',
+      false,
+    );
+
+    server.virtualMachines.forEach((vm) => {
+      vm.applicationInfo = filterData(vm.applicationInfo, 'deleted', false);
+    });
+
+    return server;
   }
 }
