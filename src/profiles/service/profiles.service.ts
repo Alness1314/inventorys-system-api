@@ -71,4 +71,12 @@ export class ProfilesService {
     }
     return rol;
   }
+
+  async findByName(name: string) {
+    const rol = await this._profileRepository.findOneBy({ name: name });
+    if (!rol) {
+      this.logger.warn(`Profile with id:${name} not found`);
+    }
+    return rol;
+  }
 }

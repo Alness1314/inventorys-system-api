@@ -22,22 +22,25 @@ export class ApplicationInfoController {
   ) {}
 
   @Post()
+  @Auth(ValidProfiles.admin)
   create(@Body() createApplicationInfoDto: CreateApplicationInfoDto) {
     return this.applicationInfoService.create(createApplicationInfoDto);
   }
 
   @Get()
-  @Auth(ValidProfiles.admin)
+  @Auth()
   findAll() {
     return this.applicationInfoService.findAll();
   }
 
   @Get(':id')
+  @Auth()
   findOne(@Param('id') id: string) {
     return this.applicationInfoService.findOne(id);
   }
 
   @Put(':id')
+  @Auth(ValidProfiles.admin)
   update(
     @Param('id') id: string,
     @Body() updateApplicationInfoDto: UpdateApplicationInfoDto,
@@ -46,6 +49,7 @@ export class ApplicationInfoController {
   }
 
   @Delete(':id')
+  @Auth(ValidProfiles.admin)
   remove(@Param('id') id: string) {
     return this.applicationInfoService.remove(id);
   }

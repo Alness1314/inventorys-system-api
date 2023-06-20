@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { enviroments } from './enviroments';
 import { ServerInfoModule } from './server-info/server-info.module';
 import { VirtualMachineModule } from './virtual-machine/virtual-machine.module';
@@ -9,6 +9,10 @@ import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { AuthModule } from './auth/auth.module';
 import config from './config';
+import { UsersService } from './users/service/users.service';
+import { setDefaultUser } from './users/config/default-user';
+import { ProfilesService } from './profiles/service/profiles.service';
+import { setDefaultProfiles } from './users/config/default-profiles';
 
 @Module({
   imports: [
@@ -28,4 +32,13 @@ import config from './config';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(
+    private readonly _configService: ConfigService,
+    private readonly _userService: UsersService,
+    private readonly _profileService: ProfilesService,
+  ) {
+    setDefaultProfiles(_configService, _profileService);
+    setDefaultUser(_configService, _userService, _profileService);
+  }
+}

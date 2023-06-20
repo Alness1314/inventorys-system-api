@@ -89,4 +89,16 @@ export class UsersService {
     }
     return user;
   }
+
+  async findByEmail(email: string) {
+    const user = await this._userRespository.findOne({
+      relations: ['profiles'],
+      where: { email: email },
+    });
+    if (!user) {
+      this.logger.warn(`User ${email} not found`);
+      return null;
+    }
+    return user;
+  }
 }
