@@ -11,6 +11,8 @@ import { ApplicationInfoService } from '../service/application-info.service';
 import { CreateApplicationInfoDto } from '../dto/create-application-info.dto';
 import { UpdateApplicationInfoDto } from '../dto/update-application-info.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Auth } from 'src/auth/decorators/auth.decorator';
+import { ValidProfiles } from 'src/auth/interfaces/valid-profiles';
 
 @ApiTags('Application Info')
 @Controller('application-info')
@@ -25,6 +27,7 @@ export class ApplicationInfoController {
   }
 
   @Get()
+  @Auth(ValidProfiles.admin)
   findAll() {
     return this.applicationInfoService.findAll();
   }

@@ -5,6 +5,9 @@ import { enviroments } from './enviroments';
 import { ServerInfoModule } from './server-info/server-info.module';
 import { VirtualMachineModule } from './virtual-machine/virtual-machine.module';
 import { ApplicationInfoModule } from './application-info/application-info.module';
+import { UsersModule } from './users/users.module';
+import { ProfilesModule } from './profiles/profiles.module';
+import { AuthModule } from './auth/auth.module';
 import config from './config';
 
 @Module({
@@ -18,6 +21,9 @@ import config from './config';
     ServerInfoModule,
     VirtualMachineModule,
     ApplicationInfoModule,
+    UsersModule,
+    ProfilesModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

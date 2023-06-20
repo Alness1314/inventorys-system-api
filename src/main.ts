@@ -16,29 +16,33 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  //const timeZone = momentTimezone.tz.guess();
+  //momentTimezone.tz.setDefault(timeZone);
+
+  //initSwagger(app);
   const config = new DocumentBuilder()
-    .setTitle('Server Inventory API')
+    .setTitle('API-SAI360')
     .setDescription(
-      'Application for managing information about servers for Grupo Susess.',
+      'Storage server information management module for Grupo Susess.',
     )
     .setVersion('1.0')
-    /*.addSecurity('bearer', {
-      type: 'http',
-      scheme: 'bearer',
-    })
-    .addBearerAuth()*/
+    //.addSecurity('bearer', {
+    //type: 'http',
+    //scheme: 'bearer',
+    //})
+    .addBearerAuth()
     .build();
 
   //const theme = new SwaggerTheme('v3');
   const customOptions: SwaggerCustomOptions = {
     swaggerOptions: {
       ignoreGlobalPrefix: false,
-      //persistAuthorization: true,
+      persistAuthorization: true,
       docExpansion: 'list',
       filter: true,
     },
     //customCss: theme.getBuffer('dark'),
-    customSiteTitle: 'SIA',
+    customSiteTitle: 'API-SAI360',
   };
 
   const document = SwaggerModule.createDocument(app, config);
