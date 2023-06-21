@@ -38,6 +38,7 @@ export class AuthService {
     //const user: User = await this._userService.findUserByEmailAndPassword(loginUserDto);
 
     //TODO: return jwt token
+    delete user.password;
     return {
       ...user,
       token: this.generateJwtToken({ id: user.id, email: user.email }),
@@ -46,6 +47,7 @@ export class AuthService {
 
   async refreshToken(user: User) {
     //TODO: return jwt token
+    delete user.password;
     return {
       ...user,
       token: this.generateJwtToken({ id: user.id, email: user.email }),

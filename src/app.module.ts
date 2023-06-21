@@ -13,6 +13,7 @@ import { UsersService } from './users/service/users.service';
 import { setDefaultUser } from './users/config/default-user';
 import { ProfilesService } from './profiles/service/profiles.service';
 import { setDefaultProfiles } from './users/config/default-profiles';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { setDefaultProfiles } from './users/config/default-profiles';
     UsersModule,
     ProfilesModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
